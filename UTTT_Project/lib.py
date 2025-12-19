@@ -1,9 +1,10 @@
 class Board():
-    def __init__(self, bs:list, wonboards:list, o:bool,gg:bool) -> None:
+    def __init__(self, bs:list, wonboards:list, o:bool,gg:bool,sb:int) -> None:
         self.bs = bs
         self.o = o
         self.wonboards = wonboards
         self.gg = gg
+        self.sb = sb
 def PrintBoard(board:Board) ->None: #print board function
     for i in range(0,3):
         for j in range(0,3):
@@ -71,10 +72,20 @@ def GameFinished(board:Board,o:bool) ->bool: #returns whether the game has been 
     board.gg = output
     return output
 def MakeMove(board:Board,o:bool,a:int,b:int) ->None: #The target square MUST be empty
+    board.sb = b
     if o:
         board.bs[a][b] = 1
     else:
         board.bs[a][b] = 2
+def VerifyMove(board:Board,a:int,b:int) ->int:
+    if a>8 or b>8: #check if index is in range
+        return 1 
+    elif board.bs[a][b] != 0: #check if square is occupied
+        return 2 
+    elif a != board.sb and board.sb!=9: #check if the UTTT rule applies 
+        return 3
+    else: #all good
+        return 0
 def StartRound(board:Board,o:bool):
     a = b = 99
     PrintBoard(board)
@@ -83,16 +94,16 @@ def StartRound(board:Board,o:bool):
     else:
         player = "X"
     print("debug: enter p to skip your turn")
-    inpt = input(f"{player}'s turn, please make a move") #takes "ab" as input, puts piece on board a, position b
+    inpt = list(input(f"{player}'s turn, please make a move")) #takes "ab" as input, puts piece on board a, position b
     if inpt == "p":
         board.o = not o
         return
     a = int(inpt[0])
     b = int(inpt[1])
-    if board.bs[a][b] == 0:
+    if VerifyMove(board,a,b) == 0:
         MakeMove(board,o,a,b)
     else:
-        board.o = not o
+        print("error "+str(VerifyMove(board,a,b)))
         return
     BoardFinished(board,a,o)
     GameFinished(board,o)
@@ -105,7 +116,7 @@ def BoardInit() ->Board:
         list.append([])
         for j in range(0,9):
             list[i].append(0)
-    list[0][0] = 1
+    """list[0][0] = 1
     list[0][1] = 1
     list[0][2] = 1
     list[1][0] = 1
@@ -113,11 +124,11 @@ def BoardInit() ->Board:
     list[1][2] = 1
     list[2][0] = 1
     list[2][1] = 1
-    list[2][2] = 0
-    wb = [1,1,0,0,0,0,0,0,0]
+    list[2][2] = 0"""
+    wb = [0,0,0,0,0,0,0,0,0]
     """for i in range(0,9):
         wb.append(1)"""
-    board = Board(list,wb,True,False)
+    board = Board(list,wb,True,False,9)
     return board
 def main():
     board = BoardInit()
